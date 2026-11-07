@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Comprehensive Marathi Lexicon, Morphological Suffix Rules,
  * Categorized Vocabulary, Proverbs (म्हणी), and Document Templates.
  */
@@ -1119,172 +1119,48 @@ export const MARATHI_SUFFIX_RULES: {
   { romanSuffix: "hi", devSuffix: "ही", needsOblique: false },
 ];
 
-export type VocabCategory = {
-  id: string;
-  title: string;
-  subtitle: string;
-  items: { roman: string; marathi: string; meaning: string }[];
+export const PHONETIC_CHART = {
+  vowels: [
+    { roman: "a", dev: "अ / (क)", matra: "—" },
+    { roman: "aa / A", dev: "आ", matra: "ा (का)" },
+    { roman: "i", dev: "इ", matra: "ि (कि)" },
+    { roman: "ii / ee / I", dev: "ई", matra: "ी (की)" },
+    { roman: "u", dev: "उ", matra: "ु (कु)" },
+    { roman: "uu / oo / U", dev: "ऊ", matra: "ू (कू)" },
+    { roman: "ru / ri / R", dev: "ऋ", matra: "ृ (कृ)" },
+    { roman: "e", dev: "ए", matra: "े (के)" },
+    { roman: "ai", dev: "ऐ", matra: "ै (कै)" },
+    { roman: "o", dev: "ओ", matra: "ो (को)" },
+    { roman: "au / ou", dev: "औ", matra: "ौ (कौ)" },
+    { roman: "am / M / n", dev: "अं (अनुस्वार)", matra: "ं (कं)" },
+    { roman: "aha / H", dev: "अः (विसर्ग)", matra: "ः (कः)" },
+  ],
+  consonants: [
+    { roman: "k / kh / g / gh", dev: "क / ख / ग / घ" },
+    { roman: "ch / chh / j / jh / z", dev: "च / छ / ज / झ" },
+    { roman: "T / Th / D / Dh / N", dev: "ट / ठ / ड / ढ / ण" },
+    { roman: "t / th / d / dh / n", dev: "त / थ / द / ध / न" },
+    { roman: "p / ph (f) / b / bh / m", dev: "प / फ / ब / भ / म" },
+    { roman: "y / r / l / v (w)", dev: "य / र / ल / व" },
+    { roman: "sh / Sh / s / h", dev: "श / ष / स / ह" },
+    { roman: "L / zh", dev: "ळ" },
+    { roman: "ksh / x", dev: "क्ष" },
+    { roman: "dny / gy / jn", dev: "ज्ञ" },
+    { roman: "shri / shree", dev: "श्री" },
+    { roman: "rya (उदा. surya)", dev: "र्य (सूर्य)" },
+  ],
+  specialExamples: [
+    { roman: "sanskruti", dev: "संस्कृती" },
+    { roman: "maharashtra", dev: "महाराष्ट्र" },
+    { roman: "dnyaneshwar", dev: "ज्ञानेश्वर" },
+    { roman: "krupaya", dev: "कृपया" },
+    { roman: "swatantrya", dev: "स्वातंत्र्य" },
+    { roman: "ashirvad", dev: "आशीर्वाद" },
+    { roman: "chhatrapati", dev: "छत्रपती" },
+    { roman: "sahyadri", dev: "सह्याद्री" },
+    { roman: "mauli", dev: "माऊली" },
+    { roman: "puranpoli", dev: "पुरणपोळी" },
+    { roman: "pandharpur", dev: "पंढरपूर" },
+    { roman: "shubhechha", dev: "शुभेच्छा" },
+  ],
 };
-
-export const VOCAB_CATEGORIES: VocabCategory[] = [
-  {
-    id: "daily",
-    title: "दैनंदिन संवाद",
-    subtitle: "Daily Conversation",
-    items: [
-      { roman: "namaskar, tumhi kase aahat?", marathi: "नमस्कार, तुम्ही कसे आहात?", meaning: "Hello, how are you?" },
-      { roman: "mi majet aahe, dhanyavad!", marathi: "मी मजेत आहे, धन्यवाद!", meaning: "I am doing well, thank you!" },
-      { roman: "tumche naav kay aahe?", marathi: "तुमचे नाव काय आहे?", meaning: "What is your name?" },
-      { roman: "mala thodi madat havi aahe", marathi: "मला थोडी मदत हवी आहे", meaning: "I need a little help" },
-      { roman: "krupaya thoda vel thamba", marathi: "कृपया थोडा वेळ थांबा", meaning: "Please wait a moment" },
-      { roman: "tumhala bhetun khup anand zala", marathi: "तुम्हाला भेटून खूप आनंद झाला", meaning: "Very pleased to meet you" },
-      { roman: "aajcha divas khup chhan aahe", marathi: "आजचा दिवस खूप छान आहे", meaning: "Today is a wonderful day" },
-      { roman: "jevana zale ka tumche?", marathi: "जेवण झाले का तुमचे?", meaning: "Have you had your meal?" },
-      { roman: "kahi harkat nahi", marathi: "काही हरकत नाही", meaning: "No problem at all" },
-      { roman: "nakkich, apan lavkarach bhetuya", marathi: "नक्कीच, आपण लवकरच भेटूया", meaning: "Surely, let's meet soon" },
-      { roman: "tumchya sahakaryabaddal manapasun aabhar", marathi: "तुमच्या सहकार्याबद्दल मनापासून आभार", meaning: "Heartfelt thanks for your cooperation" },
-      { roman: "kalji ghya aani anandi raha", marathi: "काळजी घ्या आणि आनंदी राहा", meaning: "Take care and stay happy" },
-    ],
-  },
-  {
-    id: "official",
-    title: "शासकीय व कार्यालयीन",
-    subtitle: "Official & Administrative",
-    items: [
-      { roman: "mananiya mahoday", marathi: "माननीय महोदय", meaning: "Respected Sir" },
-      { roman: "vinanti arj", marathi: "विनंती अर्ज", meaning: "Request Application" },
-      { roman: "shasan nirnay", marathi: "शासन निर्णय", meaning: "Government Resolution (GR)" },
-      { roman: "pudhil karyavahisathi", marathi: "पुढील कार्यवाहीसाठी", meaning: "For further necessary action" },
-      { roman: "pramanpatra milnyababat", marathi: "प्रमाणपत्र मिळण्याबाबत", meaning: "Regarding issuance of certificate" },
-      { roman: "majurichi apeksha aahe", marathi: "मंजुरीची अपेक्षा आहे", meaning: "Awaiting approval" },
-      { roman: "apla namra", marathi: "आपला नम्र", meaning: "Yours humbly / sincerely" },
-      { roman: "krupaya नोंद ghyavi", marathi: "कृपया नोंद घ्यावी", meaning: "Please take note" },
-      { roman: "upasthit rahnyachi vinanti", marathi: "उपस्थित राहण्याची विनंती", meaning: "Request to remain present" },
-      { roman: "kagadpatre jodet aahet", marathi: "कागदपत्रे जोडत आहोत", meaning: "Documents are attached herewith" },
-      { roman: "tatkal laksh dyave", marathi: "तात्काळ लक्ष द्यावे", meaning: "Kindly give immediate attention" },
-      { roman: "sadar prakarani chaukashi vhavi", marathi: "सदर प्रकरणी चौकशी व्हावी", meaning: "Inquiry should be conducted in this matter" },
-    ],
-  },
-  {
-    id: "proverbs",
-    title: "म्हणी व सुविचार",
-    subtitle: "Marathi Proverbs & Idioms",
-    items: [
-      { roman: "prayatnanti parmeshwar", marathi: "प्रयत्नांती परमेश्वर", meaning: "God helps those who persevere" },
-      { roman: "thembe thembe tale sache", marathi: "थेंबे थेंबे तळे साचे", meaning: "Little drops of water make a mighty ocean" },
-      { roman: "ati tithe mati", marathi: "अति तिथे माती", meaning: "Excess of anything is harmful" },
-      { roman: "ikde aar tikde vihir", marathi: "इकडे आड तिकडे विहीर", meaning: "Caught between the devil and the deep sea" },
-      { roman: "kakhet kalsa gavala valsa", marathi: "काखेत कळसा गावाला वळसा", meaning: "Searching everywhere for what is right with you" },
-      { roman: "nachta yeina angan vakde", marathi: "नाचता येईना अंगण वाकडे", meaning: "A bad workman blames his tools" },
-      { roman: "karave tase bharave", marathi: "करावे तसे भरावे", meaning: "As you sow, so shall you reap" },
-      { roman: "vasrat langdi gay shahani", marathi: "वासरात लंगडी गाय शहाणी", meaning: "Among the blind, the one-eyed man is king" },
-      { roman: "durun dongar Gojire", marathi: "दुरून डोंगर साजरे", meaning: "The grass is always greener on the other side" },
-      { roman: "shuddha bijapoti fale rasal gomati", marathi: "शुद्ध बीजापोटी फळे रसाळ गोमटी", meaning: "Good character and roots yield noble results" },
-      { roman: "vachal tar vachal", marathi: "वाचाल तर वाचाल", meaning: "If you read, you will thrive" },
-      { roman: "jya ghari shantata tya ghari samruddhi", marathi: "ज्या घरी शांतता त्या घरी समृद्धी", meaning: "Where there is peace, there is prosperity" },
-    ],
-  },
-  {
-    id: "culture",
-    title: "सण, संस्कृती व शुभेच्छा",
-    subtitle: "Festivals & Wishes",
-    items: [
-      { roman: "vadhdivsachya hardik shubhechha!", marathi: "वाढदिवसाच्या हार्दिक शुभेच्छा!", meaning: "Heartiest birthday wishes!" },
-      { roman: "gudhipadvyachya aani navin varshachya shubhechha", marathi: "गुढीपाडव्याच्या आणि नवीन वर्षाच्या शुभेच्छा", meaning: "Happy Gudi Padwa and New Year" },
-      { roman: "dipavalichya mangalmay shubhechha", marathi: "दीपावलीच्या मंगलमय शुभेच्छा", meaning: "Auspicious Diwali wishes" },
-      { roman: "tilgul ghya, god god bola", marathi: "तिळगूळ घ्या, गोड गोड बोला", meaning: "Makar Sankranti greeting of sweetness & harmony" },
-      { roman: "ganpati bappa morya, mangalmurti morya", marathi: "गणपती बाप्पा मोरया, मंगलमूर्ती मोरया", meaning: "Invocation of Lord Ganesha" },
-      { roman: "maharashtrachi sanskruti mahan aahe", marathi: "महाराष्ट्राची संस्कृती महान आहे", meaning: "The culture of Maharashtra is great" },
-      { roman: "tumchya pudhil vatchalisathi shubhechha", marathi: "तुमच्या पुढील वाटचालीसाठी शुभेच्छा", meaning: "Best wishes for your future endeavors" },
-      { roman: "yashasvi vha, haach aashirvad", marathi: "यशस्वी व्हा, हाच आशीर्वाद", meaning: "May you succeed, that is our blessing" },
-    ],
-  },
-];
-
-export type DocumentTemplate = {
-  id: string;
-  title: string;
-  category: string;
-  description: string;
-  content: string;
-};
-
-export const DOCUMENT_TEMPLATES: DocumentTemplate[] = [
-  {
-    id: "leave-app",
-    title: "सुट्टीचा अर्ज (Leave Application)",
-    category: "शाळा / कार्यालय",
-    description: "शाळा, महाविद्यालय किंवा कार्यालयासाठी रजेचा तयार अर्ज",
-    content: `दिनांक: ०७ नोव्हेंबर २०२६
-
-प्रति,
-माननीय मुख्याध्यापक / व्यवस्थापक महोदय,
-[संस्थेचे / कार्यालयाचे नाव],
-[शहर / गाव].
-
-विषय: दोन दिवसांची रजा मिळण्याबाबत विनंती अर्ज.
-
-माननीय महोदय,
-वरील विषयास अनुसरून सविनय विनंती करतो/करते की, मला काही महत्त्वाच्या कौटुंबिक कारणास्तव दिनांक ०८ नोव्हेंबर ते ०९ नोव्हेंबर २०२६ या कालावधीत कामावर / वर्गात उपस्थित राहणे शक्य होणार नाही.
-
-तरी कृपया मला दोन दिवसांची रजा मंजूर करावी, ही नम्र विनंती. रजेच्या कालावधीतील राहिलेला अभ्यास / काम मी परत आल्यावर पूर्ण करीन.
-
-आपला / आपली नम्र,
-[तुमचे नाव]
-[पद / इयत्ता]`,
-  },
-  {
-    id: "official-letter",
-    title: "शासकीय विनंती अर्ज (Official Request)",
-    category: "शासकीय कामकाज",
-    description: "ग्रामपंचायत, नगरपालिका किंवा शासकीय कार्यालयासाठी अधिकृत अर्ज",
-    content: `दिनांक: ०७ नोव्हेंबर २०२६
-
-प्रति,
-माननीय अधिकारी महोदय,
-[विभागाचे / कार्यालयाचे नाव],
-[तालुका / जिल्हा].
-
-विषय: आवश्यक प्रमाणपत्र / नागरी सुविधा मिळण्याबाबत विनंती अर्ज.
-
-महोदय,
-मी खाली सही करणारा/करणारी [तुमचे पूर्ण नाव], राहणार [तुमचा पत्ता], आपणास सविनय विनंती करतो/करते की, माझ्या परिसरातील / वैयक्तिक कामासाठी वरील विषयानुसार तात्काळ कार्यवाही होणे अत्यंत गरजेचे आहे.
-
-या अर्जासोबत आवश्यक ती सर्व कागदपत्रे आणि ओळखपत्राची प्रत जोडलेली आहे. तरी कृपया माझ्या अर्जाचा सहानुभूतीपूर्वक विचार करून पुढील योग्य ती कार्यवाही करावी, ही नम्र विनंती.
-
-सोबत: आवश्यक कागदपत्रांच्या प्रती.
-
-आपला / आपली विश्वासू,
-[तुमचे नाव]
-मोबाईल क्र.: [तुमचा नंबर]`,
-  },
-  {
-    id: "wishes-msg",
-    title: "वाढदिवस व सण शुभेच्छा (Festive Wishes)",
-    category: "शुभेच्छा संदेश",
-    description: "मित्र, कुटुंबीय आणि सहकाऱ्यांना पाठवण्यासाठी सुंदर मराठी शुभेच्छा",
-    content: `प्रिय मित्र / स्नेही,
-
-तुम्हाला वाढदिवसाच्या आणि येणाऱ्या नवीन पर्वाच्या मनापासून हार्दिक शुभेच्छा! 🎉🌸
-
-तुमच्या आयुष्यात सुख, शांती, उत्तम आरोग्य आणि भरभरून यश लाभो. तुमची सर्व स्वप्ने पूर्ण होवोत आणि तुमच्या कर्तृत्वाचा आलेख असाच उंचावत राहो, हीच ईश्वरचरणी प्रार्थना!
-
-पुन्हा एकदा खूप खूप शुभेच्छा आणि मनापासून अभिनंदन!
-
-स्नेहांकित,
-[तुमचे नाव]`,
-  },
-  {
-    id: "essay-culture",
-    title: "मराठी भाषा व संस्कृती (Essay / Article)",
-    category: "निबंध / लेख",
-    description: "महाराष्ट्राची समृद्ध भाषा, साहित्य आणि संस्कृती यावर सुंदर लेख",
-    content: `महाराष्ट्राची समृद्ध संस्कृती आणि मराठी भाषा
-
-"लाभले आम्हास भाग्य बोलतो मराठी, जाहलो खरेच धन्य ऐकतो मराठी!"
-
-मराठी ही केवळ एक भाषा नसून ती महाराष्ट्राची अस्मिता, संस्कृती आणि जीवनपद्धती आहे. संत ज्ञानेश्वर, संत तुकाराम, संत एकनाथ आणि समर्थ रामदास यांच्या ओव्या व अभंगांतून मराठी भाषेला भक्ती आणि तत्त्वज्ञानाचे अनमोल लेणे लाभले आहे. छत्रपती शिवाजी महाराजांच्या स्वराज्याची आणि पराक्रमाची गाथा याच मायबोलीतून घराघरात पोहोचली.
-
-आपली संस्कृती आपल्याला पाहुण्यांचे स्वागत, मोठ्यांचा आदर, निसर्गाविषयी कृतज्ञता आणि सामाजिक एकोपा शिकवते. गुढीपाडवा, दिवाळी, गणेशोत्सव आणि आषाढी वारी यांसारखे सण आपल्या जीवनात उत्साह आणि आनंद निर्माण करतात. आजच्या डिजिटल युगातही मराठी भाषेचा अभिमान बाळगून तिचे जतन आणि संवर्धन करणे हे आपल्या सर्वांचे आद्य कर्तव्य आहे.`,
-  },
-];
