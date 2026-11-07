@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Undo2, Redo2, Trash2, Copy, FileText, FileDown, Keyboard, Check, X,
   Sparkles, BookOpen, ClipboardCopy, Type, Languages,
-  Lightbulb, ShieldCheck, Zap, Globe, Search, Volume2, VolumeX,
+  ShieldCheck, Zap, Globe, Search, Volume2, VolumeX,
   Mic, MicOff, Plus, BookmarkPlus, FolderOpen, Save, Hash, ZoomIn, ZoomOut, FileType,
 } from "lucide-react";
 import {
@@ -1311,13 +1311,14 @@ export default function App() {
             )}
           </div>
 
-          {/*
-            ZERO-SHIFT SUGGESTIONS BAR:
-            Strict fixed height (h-14 / 56px) + single-row horizontal scroll so the editor NEVER shifts or jumps while typing!
-          */}
-          <div className="flex h-14 items-center border-b border-gray-200 bg-green-50/40 px-4 sm:px-5 overflow-x-auto overflow-y-hidden whitespace-nowrap">
-            {candidate ? (
-              <div className="flex w-full items-center gap-2 whitespace-nowrap">
+          {/* Textarea with zero-shift floating suggestions bar at top */}
+          <div className="relative">
+            {candidate && (
+              <div className="
+                absolute inset-x-0 top-0 z-10 flex h-12 items-center gap-2
+                border-b border-green-200 bg-green-50/95 px-4 sm:px-5
+                overflow-x-auto overflow-y-hidden whitespace-nowrap backdrop-blur
+              ">
                 <div className="flex shrink-0 items-center gap-1.5 text-sm">
                   <span className="rounded-full bg-white border border-green-300 px-2.5 py-0.5 font-mono text-xs font-bold text-green-900">
                     {candidate.roman}
@@ -1369,34 +1370,7 @@ export default function App() {
                   </span>
                 </div>
               </div>
-            ) : (
-              <div className="flex w-full items-center justify-between gap-3 whitespace-nowrap">
-                <p className="flex items-center gap-2 text-xs sm:text-sm text-gray-600 font-devanagari truncate">
-                  <Lightbulb className="h-4 w-4 shrink-0 text-green-700" />
-                  {mode === "english"
-                    ? "सध्या English मोड सुरू आहे. मराठीत टाइप करण्यासाठी 'मराठी' मोड निवडा."
-                    : autoConvert
-                      ? "इंग्रजी अक्षरांत शब्द टाइप करा — इथे लगेच मराठी पर्याय दिसतील (Space किंवा 1–7 दाबा)."
-                      : "Auto-convert बंद आहे — मराठी रूपांतरासाठी Auto-convert सुरू (ON) करा."}
-                </p>
-                <div className="hidden items-center gap-1.5 lg:flex shrink-0">
-                  {EXAMPLES.slice(0, 4).map((ex) => (
-                    <button
-                      key={ex.roman}
-                      type="button"
-                      onClick={() => insertPhrase(ex.devanagari, `${ex.roman} → ${ex.devanagari}`)}
-                      className="rounded-full border border-gray-200 bg-white px-2.5 py-1 text-xs font-medium text-gray-600 hover:border-green-300 hover:bg-green-50 hover:text-green-800"
-                    >
-                      {ex.roman} → <span className="font-devanagari">{ex.devanagari}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
             )}
-          </div>
-
-          {/* Textarea */}
-          <div className="relative">
             <textarea
               ref={textareaRef}
               value={text}
@@ -1404,19 +1378,14 @@ export default function App() {
               onKeyDown={handleKeyDown}
               onPaste={handlePaste}
               style={{ fontSize: `${fontSize}px` }}
-              placeholder={"इथे टाइप करा…\n\nउदा. namaskar, maharashtrachi sanskruti khup sundar aahe\n\nकिंवा खालील 'तयार मसुदे (Templates)' व 'शब्दकोश' मधून थेट वाक्ये निवडा."}
-              className="editor-scroll min-h-[280px] w-full resize-y bg-white px-5 py-5 leading-[1.9] text-gray-900 outline-none placeholder:text-base placeholder:leading-relaxed placeholder:text-gray-400 sm:min-h-[340px] font-devanagari"
+              placeholder={"इथे टाइप करा…\n\nउदा. namaskar, maharashtrachi sanskruti khup sundar aahe"}
+              className="editor-scroll min-h-[280px] w-full resize-y bg-white px-5 pt-14 pb-5 leading-[1.9] text-gray-900 outline-none placeholder:text-base placeholder:leading-relaxed placeholder:text-gray-400 sm:min-h-[340px] font-devanagari"
               aria-label="Marathi typing editor"
               spellCheck={false}
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"
             />
-            {text.length === 0 && (
-              <div className="pointer-events-none absolute right-4 top-4 hidden rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-800 sm:block">
-                Zero-shift Live Transliteration
-              </div>
-            )}
           </div>
 
           {/* Stats Bar */}
