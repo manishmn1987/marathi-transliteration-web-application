@@ -3,9 +3,13 @@
  * Custom rule-based engine (MIT licensed, no paid API, fully offline).
  * Inspired by Google Input Tools / Dakshina transliteration principles.
  * - Dictionary overrides for common Marathi words (highest accuracy)
+ * - Morphological stem + oblique form (सामान्यरूप) + postposition analyzer
+ * - Personal user dictionary (persisted in localStorage)
  * - Phonetic syllable parser for unknown words
  * - Candidate generation for ambiguous spellings (ळ / ल, ण / न, ड / द, anusvara)
  */
+
+import { EXTRA_DICT_ENTRIES, MARATHI_SUFFIX_RULES } from "./marathiData";
 
 export const ENGLISH_WORDS = new Set([
   "the","are","was","were","been","being","and","but","then","else",
@@ -1024,7 +1028,189 @@ const DICT_ENTRIES: [string, string[]][] = [
   ["khare", ["खरे"]],
   ["khota", ["खोटा", "खोटं", "खोटे", "खोटी"]],
 ];
-export const MARATHI_DICT: Record<string, string[]> = Object.fromEntries(DICT_ENTRIES);
+
+function buildMergedDict(): Record<string, string[]> {
+  const map: Record<string, string[]> = {};
+  for (const [key, vals] of [...DICT_ENTRIES, ...EXTRA_DICT_ENTRIES]) {
+    const k = key.toLowerCase();
+    if (!map[k]) {
+      map[k] = [...vals];
+    } else {
+      for (const v of vals) {
+        if (!map[k].includes(v)) map[k].push(v);
+      }
+    }
+  }
+  return map;
+}
+
+export const MARATHI_DICT: Record<string, string[]> = buildMergedDict();
+
+const CUSTOM_DICT_KEY = "marathi_typing_custom_dict_v1";
+
+let customDictCache: Record<string, string> | null = null;
+
+export function getCustomDictionary(): Record<string, string> {
+  if (customDictCache) return customDictCache;
+  try {
+    const raw = typeof localStorage !== "undefined" ? localStorage.getItem(CUSTOM_DICT_KEY) : null;
+    customDictCache = raw ? JSON.parse(raw) : {};
+  } catch {
+    customDictCache = {};
+  }
+  return customDictCache!;
+}
+
+export function addCustomWord(romanRaw: string, marathiWord: string): Record<string, string> {
+  const key = romanRaw.toLowerCase().replace(/[^a-z]/g, "");
+  const val = marathiWord.trim();
+  if (!key || !val) return getCustomDictionary();
+  const next = { ...getCustomDictionary(), [key]: val };
+  customDictCache = next;
+  try {
+    localStorage.setItem(CUSTOM_DICT_KEY, JSON.stringify(next));
+  } catch {}
+  return next;
+}
+
+export function removeCustomWord(romanRaw: string): Record<string, string> {
+  const key = romanRaw.toLowerCase().replace(/[^a-z]/g, "");
+  const next = { ...getCustomDictionary() };
+  delete next[key];
+  customDictCache = next;
+  try {
+    localStorage.setItem(CUSTOM_DICT_KEY, JSON.stringify(next));
+  } catch {}
+  return next;
+}
+
+/**
+ * Computes Marathi oblique forms (सामान्यरूप) of a Devanagari noun/pronoun stem
+ * before attaching postpositions like -ला, -चा, -साठी, -मध्ये, -वर, -पासून, etc.
+ */
+function toMarathiObliqueForms(devStem: string): string[] {
+  const forms = new Set<string>();
+  // Special irregular oblique stems in Marathi
+  const irregulars: Record<string, string[]> = {
+    "मी": ["माझ्या", "मज"],
+    "तू": ["तुझ्या", "तुज"],
+    "तो": ["त्या"],
+    "ती": ["ति"],
+    "ते": ["त्या"],
+    "हा": ["ह्या", "या"],
+    "ही": ["हि", "या"],
+    "हे": ["ह्या", "या"],
+    "कोण": ["कोणा", "कुणा"],
+    "आपण": ["आपल्या"],
+    "आम्ही": ["आमच्या", "आम्हा"],
+    "तुम्ही": ["तुमच्या", "तुम्हा"],
+    "पाणी": ["पाण्या"],
+    "शाळा": ["शाळे"],
+    "भाषा": ["भाषे"],
+    "दिशा": ["दिशे"],
+    "कथा": ["कथे"],
+    "कविता": ["कविते"],
+    "माती": ["माती"],
+    "शेती": ["शेती"],
+    "नदी": ["नदी"],
+    "गाडी": ["गाडी", "गाड्या"],
+    "मुलगा": ["मुला"],
+    "मुलगी": ["मुली"],
+    "माणूस": ["माणसा"],
+    "पाऊस": ["पावसा"],
+    "गाव": ["गावा"],
+    "नाव": ["नावा"],
+    "घर": ["घरा"],
+    "काम": ["कामा"],
+    "देश": ["देशा"],
+    "मित्र": ["मित्रा"],
+    "दिवस": ["दिवसा"],
+    "महिना": ["महिन्या"],
+    "आठवडा": ["आठवड्या"],
+    "रस्ता": ["रस्त्या"],
+    "पैसे": ["पैशा"],
+    "डोळे": ["डोळ्या"],
+    "कांदा": ["कांद्या"],
+  };
+  if (irregulars[devStem]) {
+    for (const f of irregulars[devStem]) forms.add(f);
+  }
+  if (devStem.endsWith("्या")) {
+    // Already in oblique -्या form (e.g. माझ्या, तुमच्या, आमच्या, त्यांच्या, चांगल्या)
+    forms.add(devStem);
+  } else if (devStem.endsWith("ा")) {
+    // Masculine -ा -> -्या (मुलगा -> मुला, महिना -> महिन्या), Feminine -ा -> -े (शाळा -> शाळे)
+    forms.add(devStem.slice(0, -1) + "्या");
+    forms.add(devStem.slice(0, -1) + "े");
+    forms.add(devStem);
+  } else if (devStem.endsWith("ी")) {
+    forms.add(devStem);
+    forms.add(devStem.slice(0, -1) + "्या");
+  } else if (devStem.endsWith("ू")) {
+    forms.add(devStem);
+    forms.add(devStem.slice(0, -1) + "वा");
+  } else if (devStem.endsWith("े")) {
+    forms.add(devStem.slice(0, -1) + "्या");
+    forms.add(devStem);
+  } else if (!/[ािीुूृेैोौ्ंः]$/.test(devStem)) {
+    // Consonant/inherent-a ending -> + ा (घर -> घरा, मित्र -> मित्रा, पुस्तक -> पुस्तका) and bare stem (आज -> आज)
+    forms.add(devStem + "ा");
+    forms.add(devStem + "े");
+    forms.add(devStem);
+  } else {
+    forms.add(devStem);
+  }
+  return Array.from(forms);
+}
+
+function resolveMorphologicalCandidates(word: string): string[] {
+  if (word.length < 5) return [];
+  const results: string[] = [];
+  for (const rule of MARATHI_SUFFIX_RULES) {
+    if (!word.endsWith(rule.romanSuffix)) continue;
+    const rawStem = word.slice(0, word.length - rule.romanSuffix.length);
+    if (rawStem.length < 2) continue;
+
+    // Candidate roman stems to check in dictionary:
+    // e.g. "ghara" + "sathi" -> check "ghara" and "ghar"
+    // e.g. "mahinya" + "madhye" -> check "mahinya", "mahina"
+    const stemCandidates = [rawStem];
+    if (rawStem.endsWith("a") && rawStem.length >= 3) {
+      stemCandidates.push(rawStem.slice(0, -1));
+    }
+    if (rawStem.endsWith("ya") && rawStem.length >= 4) {
+      stemCandidates.push(rawStem.slice(0, -2) + "a");
+      stemCandidates.push(rawStem.slice(0, -2) + "i");
+    }
+    if (rawStem.endsWith("e") && rawStem.length >= 4) {
+      stemCandidates.push(rawStem.slice(0, -1) + "a");
+      stemCandidates.push(rawStem.slice(0, -1));
+    }
+
+    for (const st of stemCandidates) {
+      const custom = getCustomDictionary()[st];
+      const dictEntries = custom ? [custom, ...(MARATHI_DICT[st] ?? [])] : MARATHI_DICT[st];
+      if (dictEntries && dictEntries.length) {
+        const baseDev = dictEntries[0];
+        if (!rule.needsOblique || rule.devSuffix.startsWith("ां")) {
+          // If suffix already starts with ां (like -ांसाठी), strip final ा/े/ी if needed and attach
+          const stripped = baseDev.replace(/[ाे]$/, "");
+          const combined = rule.devSuffix.startsWith("ां") ? stripped + rule.devSuffix : baseDev + rule.devSuffix;
+          if (!results.includes(combined)) results.push(combined);
+        } else {
+          // If rawStem already ended with 'a' (like gharasathi -> rawStem 'ghara'), prefer the -ा oblique form first
+          const obliques = toMarathiObliqueForms(baseDev);
+          for (const ob of obliques) {
+            const combined = ob + rule.devSuffix;
+            if (!results.includes(combined)) results.push(combined);
+          }
+        }
+      }
+    }
+    if (results.length >= 4) break;
+  }
+  return results;
+}
 
 // --- Phonetic engine ---
 
@@ -1257,38 +1443,71 @@ export function getCandidates(romanRaw: string): { candidates: string[]; isEngli
   const word = romanRaw.toLowerCase().replace(/[^a-z]/g, "");
   if (!word) return { candidates: [], isEnglish: false, isDictionary: false };
 
+  const customWord = getCustomDictionary()[word];
+  const morphCandidates = resolveMorphologicalCandidates(word);
+
   // Handle neuter/anusvara form typed with trailing -n or -m on a dictionary -a word (e.g., majhan -> माझं, changlan -> चांगलं, kasan -> कसं)
-  if (word.length >= 4 && (word.endsWith("an") || word.endsWith("am")) && !MARATHI_DICT[word]) {
+  if (word.length >= 4 && (word.endsWith("an") || word.endsWith("am")) && !MARATHI_DICT[word] && !customWord) {
     const stem = word.slice(0, -1); // ends with 'a'
     const stemDict = MARATHI_DICT[stem];
     if (stemDict && stemDict.length && stemDict[0].endsWith("ा")) {
       const anusvaraForm = stemDict[0].slice(0, -1) + "ं";
-      const rule = transliterateWordRule( romanRaw );
-      const merged = [anusvaraForm, ...stemDict];
+      const rule = transliterateWordRule(romanRaw);
+      const merged = [anusvaraForm, ...stemDict, ...morphCandidates];
       for (const v of generateVariants(word, rule)) if (!merged.includes(v)) merged.push(v);
       return { candidates: merged.slice(0, 7), isEnglish: false, isDictionary: true };
     }
   }
 
   const dict = MARATHI_DICT[word];
-  if (dict && dict.length) {
-    // Merge dict + neuter anusvara variant (if ends in ा) + rule variants, dedupe, max 7
+  if (customWord || (dict && dict.length)) {
     const rule = transliterateWordRule(romanRaw);
-    const merged = [...dict];
-    if (dict[0].endsWith("ा")) {
-      const neuterForm = dict[0].slice(0, -1) + "ं";
+    const merged: string[] = [];
+    if (customWord) merged.push(customWord);
+    if (dict) {
+      for (const d of dict) if (!merged.includes(d)) merged.push(d);
+    }
+    if (merged[0]?.endsWith("ा")) {
+      const neuterForm = merged[0].slice(0, -1) + "ं";
       if (!merged.includes(neuterForm)) merged.push(neuterForm);
     }
+    for (const m of morphCandidates) if (!merged.includes(m)) merged.push(m);
     if (!merged.includes(rule)) merged.push(rule);
-    // add variants of rule and dict[0]
-    for (const v of generateVariants(word, dict[0])) if (!merged.includes(v)) merged.push(v);
+    for (const v of generateVariants(word, merged[0])) if (!merged.includes(v)) merged.push(v);
     for (const v of generateVariants(word, rule)) if (!merged.includes(v)) merged.push(v);
     return { candidates: merged.slice(0, 7), isEnglish: false, isDictionary: true };
   }
+
+  if (morphCandidates.length > 0) {
+    const rule = transliterateWordRule(romanRaw);
+    const merged = [...morphCandidates];
+    if (!merged.includes(rule)) merged.push(rule);
+    for (const v of generateVariants(word, morphCandidates[0])) if (!merged.includes(v)) merged.push(v);
+    for (const v of generateVariants(word, rule)) if (!merged.includes(v)) merged.push(v);
+    return { candidates: merged.slice(0, 7), isEnglish: false, isDictionary: true };
+  }
+
   if (ENGLISH_WORDS.has(word)) return { candidates: [], isEnglish: true, isDictionary: false };
   const rule = transliterateWordRule(romanRaw);
   const cands = generateVariants(word, rule);
   return { candidates: cands.slice(0, 7), isEnglish: false, isDictionary: false };
+}
+
+const EN_TO_MR_DIGITS: Record<string, string> = {
+  "0": "०", "1": "१", "2": "२", "3": "३", "4": "४",
+  "5": "५", "6": "६", "7": "७", "8": "८", "9": "९",
+};
+const MR_TO_EN_DIGITS: Record<string, string> = {
+  "०": "0", "१": "1", "२": "2", "३": "3", "४": "4",
+  "५": "5", "६": "6", "७": "7", "८": "8", "९": "9",
+};
+
+export function convertNumbersToMarathi(text: string): string {
+  return text.replace(/[0-9]/g, (d) => EN_TO_MR_DIGITS[d] ?? d);
+}
+
+export function convertNumbersToEnglish(text: string): string {
+  return text.replace(/[०-९]/g, (d) => MR_TO_EN_DIGITS[d] ?? d);
 }
 
 export function transliterateWord(romanRaw: string): string {
